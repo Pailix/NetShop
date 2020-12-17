@@ -46,7 +46,6 @@ namespace NetShop
             ImageArray = imageArr;
             DateOfProduction = date;
             ShelfLife = shelf;
-            job spq
         }
         private BitmapSource GetImageFromByteArray()
         {
