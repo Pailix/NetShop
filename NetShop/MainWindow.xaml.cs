@@ -1,17 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -22,9 +13,11 @@ namespace NetShop
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static SqlConnection importTableConnection =
+        private static readonly SqlConnection importTableConnection =
             new SqlConnection(@"Data Source=HOME-PC;Initial Catalog=ImportDataBase;Integrated Security=True");
+        // хранит секции, секции хранят продукты
         private List<Section<Product>> sectionsList = new List<Section<Product>>();
+        // корзина в которой хранятся товары
         private List<Cart> cartList = new List<Cart>();
         public MainWindow()
         {
@@ -32,6 +25,7 @@ namespace NetShop
             InitializeComponent();
             ComboBoxInitialisation();
         }
+        // заполнение поля со списком для выбора секции
         private void ComboBoxInitialisation()
         {
             SectionsComboBox.Items.Add("Все");
@@ -41,11 +35,29 @@ namespace NetShop
                 SectionsComboBox.Items.Add(section.SectionName);
             }
         }
+        // в поле со списком сменилось значение
+        private void SectionsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SectionsComboBox.SelectedItem.ToString() == "Все")
+            {
+                productsListView.ItemsSource = from section in sectionsList
+                                               from items in section
+                                               select items;
+            }
+            else
+            {
+                productsListView.ItemsSource = from section in sectionsList
+                                               where section.SectionName == SectionsComboBox.SelectedItem.ToString()
+                                               from items in section
+                                               select items;
+            }
+        }
         private void FillAll()
         {
             FillSections();
             FillByProducts();
         }
+        // заполняет коллекцию секций
         private void FillSections()
         {
             var sectionsTable = DataBaseController.LoadTable("SectionsTable", importTableConnection);
@@ -56,6 +68,7 @@ namespace NetShop
                 sectionsList.Add(new Section<Product>(sectionIDs[i], sectionNames[i].Trim()));
             }
         }
+        // извлечение из datatable полей
         private void FillByProducts()
         {
             var productsTable = DataBaseController.LoadTable("ProductsTable", importTableConnection);
@@ -72,6 +85,7 @@ namespace NetShop
                 AddProducts(i, products);
             }
         }
+        // из запроса заполняет секцию продуктами принадлежащими ей
         private void AddProducts(int sectionID, IEnumerable<DataRow> products)
         {
             foreach (var obj in products)
@@ -85,6 +99,7 @@ namespace NetShop
                     obj.Field<string>("ShelfLife")));
             }
         }
+        // добавляет в корзину новый продукт
         private void BuyClick(object sender, RoutedEventArgs e)
         {
             var chosenProduct = ((Button)sender).DataContext as Product;
@@ -104,6 +119,7 @@ namespace NetShop
                                select product;
             FinalSumTextBox.Text = CountFinalPrice() + " рублей";
         }
+        // удаляет продукт из корзины, если их несколько то уменьшает на один
         private void RemoveFromCart(object sender, RoutedEventArgs e)
         {
             var chosenProduct = ((Button)sender).DataContext as Cart;
@@ -122,34 +138,18 @@ namespace NetShop
                                select product;
             FinalSumTextBox.Text = CountFinalPrice() + " рублей";
         }
+        // итого в корзине
         private int CountFinalPrice()
         {
             return (int)(from product in cartList select product.TotalPrice).Sum();
         }
-        private void SectionsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (SectionsComboBox.SelectedItem.ToString() == "Все")
-            {
-                productsListView.ItemsSource = from section in sectionsList
-                                               from items in section
-                                               select items;
-            }
-            else
-            {
-                productsListView.ItemsSource = from section in sectionsList
-                                               where section.SectionName == SectionsComboBox.SelectedItem.ToString()
-                                               from items in section
-                                               select items;
-            }
-        }
-
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs args)
         {
             if (SearchTextBox.Text.Length != 0)
             {
                 productsListView.ItemsSource = from section in sectionsList
                                                from items in section
-                                               where items.Name.Contains(SearchTextBox.Text)
+                                               where items.Name.IndexOf(SearchTextBox.Text, 0, StringComparison.CurrentCultureIgnoreCase) != -1
                                                select items;
             }
             else
@@ -162,7 +162,7 @@ namespace NetShop
 
         private void OrderButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CountFinalPrice() > 1000)
+            if (CountFinalPrice() > 300)
             {
                 OrderWindow ordWin = new OrderWindow();
                 Visibility = Visibility.Collapsed;
@@ -172,7 +172,7 @@ namespace NetShop
             }
             else
             {
-                MessageBox.Show("Сумма заказа менее 1000 рублей.");
+                MessageBox.Show("Сумма заказа менее 300 рублей.");
             }
         }
 

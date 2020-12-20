@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:NetShop"
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1533.4" ResizeMode="CanResizeWithGrip" WindowState="Maximized">
     <Grid>
@@ -35,7 +34,6 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-
                     </GridView.Columns>
                 </GridView>
             </ListView.View>
@@ -75,6 +73,5 @@
         <Label Content="Поиск:" Grid.Column="2" HorizontalAlignment="Left" Margin="784.4,12,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.112,-0.109"/>
         <Button x:Name="OrderButton" Content="Оформировать заказ" Grid.Column="2" HorizontalAlignment="Left" Margin="863.4,655,0,0" VerticalAlignment="Top" Width="157" Height="37" Click="OrderButton_Click"/>
         <Button x:Name="ClearCartButton" Content="Очистить корзину" Grid.Column="2" HorizontalAlignment="Left" Margin="559.4,611,0,0" VerticalAlignment="Top" Width="129" Height="26" Click="ClearCartButton_Click"/>
-
     </Grid>
 </Window>

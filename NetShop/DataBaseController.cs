@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -10,6 +7,7 @@ namespace NetShop
 {
     class DataBaseController
     {
+        // загрузка таблицы из базы данных
         public static DataTable LoadTable(string tableName, SqlConnection sqlConnection)
         {
             var sqlExpression = "SELECT * FROM " + tableName;
@@ -20,6 +18,7 @@ namespace NetShop
             sqlConnection.Close();
             return dataTable;
         }
+        // добавляет в базу данных с заказами новую запись
         public static void InsertOrder(PersonalInformation orderInfo, SqlConnection sqlConnection, List<Cart> cartList)
         {
             var command = sqlConnection.CreateCommand();
@@ -29,6 +28,7 @@ namespace NetShop
             sqlConnection.Open();
             try
             {
+                // комманда возвращает id последней добавленной записи
                 var id = (decimal)command.ExecuteScalar();
                 InsertToLinkTable(cartList, command, Convert.ToInt32(id));
             }
@@ -37,6 +37,7 @@ namespace NetShop
                 sqlConnection.Close();
             }
         }
+        // добавление в таблицу связи id клиента и его заказа новой записи
         public static void InsertToLinkTable(List<Cart> cartList, SqlCommand command, int id)
         {
             foreach (var product in cartList)

@@ -20,9 +20,11 @@ namespace NetShop
     /// </summary>
     public partial class OrderWindow : Window
     {
-        private static SqlConnection orderTableConnection =
+        private static readonly SqlConnection orderTableConnection =
             new SqlConnection(@"Data Source=HOME-PC;Initial Catalog=OrdersDataBase;Integrated Security=True");
+        // создано для передачи списка товаров в корзине из главной формы в подчиненную
         private List<Cart> cartList;
+        PersonalInformation Bobby;
         public List<Cart> CartList
         {
             get { return cartList; }
@@ -34,6 +36,8 @@ namespace NetShop
         public OrderWindow()
         {
             InitializeComponent();
+            Bobby = new PersonalInformation("", "", "", "", "", "");
+            DataContext = Bobby;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -43,18 +47,19 @@ namespace NetShop
 
         private void FinishButton_Click(object sender, RoutedEventArgs e)
         {
-            if ((SurnameTextBox.Text.Length != 0) && (NameTextBox.Text.Length != 0) && (PatronymicTextBox.Text.Length != 0) &&
-                (AddressTextBox.Text.Length != 0) && (PhoneTextBox.Text.Length != 0) && (MailTextBox.Text.Length != 0) &&
-                (MailTextBox.Text.Contains("@")) && (PhoneTextBox.Text.All(Char.IsDigit)))
-            {
-                DataBaseController.InsertOrder(new PersonalInformation(SurnameTextBox.Text, NameTextBox.Text, PatronymicTextBox.Text, AddressTextBox.Text,
-                    PhoneTextBox.Text, MailTextBox.Text), orderTableConnection, cartList);
-                MessageBox.Show("Ваш заказ отправлен на оформление.");
-            }
-            else
-            {
-                MessageBox.Show("Данные введены неверно!");
-            }
+            DataBaseController.InsertOrder(new PersonalInformation(SurnameTextBox.Text, NameTextBox.Text, PatronymicTextBox.Text, AddressTextBox.Text,
+            PhoneTextBox.Text, MailTextBox.Text), orderTableConnection, cartList);
+            MessageBox.Show("Ваш заказ отправлен на оформление.");
+        }
+        private void TextBox_Error(object sender, ValidationErrorEventArgs e)
+        {
+            MessageBox.Show(e.Error.ErrorContent.ToString());
+            FinishButton.IsEnabled = false;         
+        }
+
+        private void AllTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FinishButton.IsEnabled = true;
         }
     }
 }
